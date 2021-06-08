@@ -2,6 +2,7 @@
 using Material.Styles;
 using System.IO;
 using System.Text;
+using Material.Files.Resolvers;
 using Material.Icons;
 
 namespace Material.Files.Model
@@ -29,6 +30,8 @@ namespace Material.Files.Model
         private ImageThumbnailModel _imageThumbnail;
         public ImageThumbnailModel ImageThumbnail => _imageThumbnail;
 
+        private MimeType _mimeType;
+
         public string ToolTip
         {
             get
@@ -39,6 +42,7 @@ namespace Material.Files.Model
                 builder.AppendLine($"Creation date: {CreationTime.ToString("f")}");
                 builder.AppendLine($"Modified date: {LastWriteTime.ToString("f")}");
                 builder.AppendLine($"Size: {FileSizeString} ({FileSize} bytes)");
+                builder.AppendLine($"Known MIME-type: {_mimeType.Name} ({_mimeType.ToString()})");
                 builder.AppendLine($"Attributes: {Attributes}");
 
                 return builder.ToString();
@@ -53,10 +57,12 @@ namespace Material.Files.Model
             var alt = info.Extension.ToLower();
             if (alt.StartsWith('.'))
                 alt = alt.Remove(0, 1);
-            _iconKind = GetIconKind(alt);
             _isExecutable = GetIsExecutable(alt);
             _isScript = GetIsScript(alt);
             _isShortcutLink = alt == "lnk";
+
+            _mimeType = MimeTypesDatabase.GetMime(alt);
+            _iconKind = GetIconKind();
 
             if (TryCreateImageThumbnailModel(this, out var thumbnail))
             {
@@ -70,7 +76,7 @@ namespace Material.Files.Model
             o = null;
             try
             {
-                if (file.IconControl == MaterialIconKind.FileImage)
+                if (file._mimeType.Type == "image")
                 {
                     o = new ImageThumbnailModel(file.FullPath, delegate
                     {
@@ -116,60 +122,11 @@ namespace Material.Files.Model
             }
         }
         
-        private static MaterialIconKind GetIconKind(string ext)
+        private MaterialIconKind GetIconKind()
         {
-            switch (ext)
-            {
-                case "cfg":
-                case "ini":
-                case "json":
-                case "dll":
-                case "sys":
-                    return MaterialIconKind.FileCog;
-                
-                case "exe":
-                    return MaterialIconKind.CogBox;
-                
-                case "bmp":
-                case "jpg":
-                case "jpeg":
-                case "png":
-                case "gif":
-                case "ico":
-                case "webp":
-                    return MaterialIconKind.FileImage;
-                
-                case "pdf":
-                    return MaterialIconKind.FilePdf;
-                
-                case "mp3":
-                case "aac":
-                case "flac":
-                case "wav":
-                    return MaterialIconKind.FileMusic;
-                
-                case "mp4":
-                case "avi":
-                case "mkv":
-                case "flv":
-                    return MaterialIconKind.FileVideo;
-                
-                case "zip":case "rar":case "7z":case "tar":case "gz":case "arc":
-                    return MaterialIconKind.ZipBox;
-
-                case "sh":
-                case "bat":
-                case "cmd":
-                case "txt":
-                case "log":
-                    return MaterialIconKind.ScriptText;
-                
-                case "lnk":
-                    return MaterialIconKind.FileLink;
-
-                default:
-                    return MaterialIconKind.File;
-            }
+            if (_mimeType.Icon is MaterialIconKind k)
+                return k;
+            return (MaterialIconKind)MimeTypesDatabase.OctetStreamMime.Icon;
         }
 
         public override string ToString()
