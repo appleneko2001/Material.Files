@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.999-cibuild0014036-beta" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.10.999-cibuild0014036-beta" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.999-cibuild0014036-beta" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.999-cibuild0014036-beta" />
+    <PackageReference Include="Material.Avalonia" Version="2.2.0" />
+   </ItemGroup>
+</Project>

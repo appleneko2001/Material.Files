@@ -1,0 +1,265 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:assists="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
+        xmlns:material="clr-namespace:Material.Styles;assembly=Material.Styles"
+        xmlns:vm="clr-namespace:Material.Files.ViewModel"
+        xmlns:m="clr-namespace:Material.Files.Model"
+        xmlns:avalonia="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:converters="clr-namespace:Material.Files.Converters"
+        xmlns:gestures="clr-namespace:Material.Files.Gestures"
+        xmlns:ripple="clr-namespace:Material.Ripple;assembly=Material.Ripple"
+        x:DataType="vm:MainWindowViewModel"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Material.Files.MainWindow"
+
+        Title="Material.Files">
+    <Window.Resources>
+        <converters:AutoResizeColumnConverter x:Key="AutoResizeColumnConverter" />
+        <RecyclePool x:Key="RecyclePool" />
+
+        <DataTemplate x:Key="ItemTemplateBlockView">
+            <Border Classes="BlockViewItem" Name="PART_ItemButton" HorizontalAlignment="Stretch" CornerRadius="4" Background="Transparent"
+                    PointerPressed="PART_ItemButton_OnPointerPressed" PointerReleased="PART_ItemButton_OnPointerReleased"
+                    ToolTip.Tip="{Binding ToolTip}" Focusable="True">
+                <Border Name="PART_ItemRoot" CornerRadius="4" ClipToBounds="True" AttachedToVisualTree="PART_ItemButton_OnAttachedToVisualTree" >
+                    <ripple:RippleEffect Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                         RippleFill="{DynamicResource PrimaryHueMidBrush}">
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Border Grid.ColumnSpan="2" CornerRadius="4" Opacity="0.15"
+                                    Background="{DynamicResource MaterialDesignBody}" IsVisible="{Binding IsSelected}" />
+                    
+                            <Panel Grid.Column="0" Width="64" Height="64"
+                                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="{Binding Opacity}">
+                                <avalonia:MaterialIcon Kind="{Binding IconControl}" Height="NaN" Width="NaN" Margin="8"
+                                                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                                <Border IsVisible="{Binding ImageThumbnail.IsLoaded, FallbackValue=False}"
+                                        Background="Black" CornerRadius="4">
+                                    <Border CornerRadius="4" ClipToBounds="True">
+                                        <Image Source="{Binding ImageThumbnail.Thumbnail}" Stretch="UniformToFill"/>
+                                    </Border>
+                                </Border>
+                                
+                                <ReversibleStackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                                    <avalonia:MaterialIcon Kind="Link" Width="24" Height="24" Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                           IsVisible="{Binding IsSymbolicLink}"/>
+                                    <avalonia:MaterialIcon Kind="Cog" Width="24" Height="24" Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                           IsVisible="{Binding IsExecutable, FallbackValue=False}"/>
+                                </ReversibleStackPanel>
+                            </Panel>
+                    
+                            <Grid Grid.Column="1" RowDefinitions="*,*,*" VerticalAlignment="Center" Margin="8,0,0,0">
+                                <TextBlock Grid.Row="0" Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="1" Text="{Binding CreationTime}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Row="2" Text="{Binding FileSizeString}" TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Grid>
+                    </ripple:RippleEffect>
+                </Border>
+            </Border>
+        </DataTemplate>
+        <RecyclingElementFactory x:Key="RecyclingItemTemplateBlockView" RecyclePool="{StaticResource RecyclePool}"
+                                 SelectTemplateKey="RecyclingItemTemplateBlockView_OnSelectTemplateKey">
+            <RecyclingElementFactory.Templates>
+                <StaticResource ResourceKey="ItemTemplateBlockView" x:Key="ItemTemplateBlockView" />
+            </RecyclingElementFactory.Templates>
+        </RecyclingElementFactory>
+        
+        <DataTemplate x:Key="DriveItemTemplate">
+            <Button Classes="Flat" Padding="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                    Click="DriveButton_OnClick" ToolTip.Tip="{Binding ToolTip}" assists:ButtonAssist.CornerRadius="0">
+                <Grid ColumnDefinitions="24,Auto,*" Margin="16,2">
+                    <avalonia:MaterialIcon Kind="{Binding IconKind}" Width="20" Height="20" />
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                               Margin="16,0,4,0" Grid.Column="1" />
+                    <TextBlock Text="{Binding Label}" Foreground="Gray"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="4,0" Grid.Column="2" />
+                </Grid>
+            </Button>
+        </DataTemplate>
+        
+    </Window.Resources>
+
+    <material:NavigationDrawer LeftDrawerOpened="{Binding ElementName=NavDrawerToggler, Path=IsChecked, Mode=TwoWay}">
+        <material:NavigationDrawer.LeftDrawerContent>
+            <material:Card Padding="0" Width="320">
+                <ScrollViewer>
+                    <StackPanel>
+                        <!-- Windows list -->
+                        <StackPanel Margin="0,8">
+                            <TextBlock Margin="24,4" Text="Sessions" Classes="Subtitle1" />
+                            <Separator />
+                            <StackPanel>
+                                <ListBox Items="{Binding SessionWindows}" Name="SessionList" SelectedIndex="{Binding SelectedSessionIndex, Mode=TwoWay}"
+                                         SelectedItem="{Binding SelectedSession}" SelectionMode="Single">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate DataType="vm:SessionWindowViewModel">
+                                            <Grid ColumnDefinitions="*, Auto, 8">
+                                                <Grid ColumnDefinitions="24,16,*" Margin="16,2,4,2">
+                                                    <avalonia:MaterialIcon Kind="DockWindow" Width="20" Height="20" />
+                                                    <TextBlock Text="{Binding CurrentDirectory}" VerticalAlignment="Center" Grid.Column="2"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                </Grid>
+                                                <Button Grid.Column="1" Classes="Flat" Padding="4" Content="{avalonia:MaterialIconExt Kind=Close, Size=20}"
+                                                        Command="{Binding CloseSessionCommand}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <Button Classes="Flat" Padding="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                        Click="CreateSessionButton_OnClick" assists:ButtonAssist.CornerRadius="0">
+                                    <Grid ColumnDefinitions="24,16,*,8" Margin="16,2">
+                                        <avalonia:MaterialIcon Kind="Plus" Width="20" Height="20" />
+                                        <TextBlock Text="Create session" VerticalAlignment="Center" Grid.Column="2"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Grid>
+                                </Button>
+                            </StackPanel>
+                            <Separator />
+                        </StackPanel>
+                        
+                        <!-- Local drives list -->
+                        <StackPanel Margin="0,8">
+                            <TextBlock Margin="24,4" Text="Local drives" Classes="Subtitle1" />
+                            <Separator />
+                            <ItemsControl Items="{Binding LocalDrives}" ItemTemplate="{StaticResource DriveItemTemplate}"/>
+                            <Separator />
+                        </StackPanel>
+                        
+                        <!-- Removable drives list -->
+                        <StackPanel Margin="0,8">
+                            <TextBlock Margin="24,4" Text="Removable drives" Classes="Subtitle1" />
+                            <Separator />
+                            <ItemsControl Items="{Binding RemovableDrives}" ItemTemplate="{StaticResource DriveItemTemplate}"/>
+                            <Separator />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </material:Card>
+        </material:NavigationDrawer.LeftDrawerContent>
+        
+        <Grid RowDefinitions="Auto,0,*" DataContext="{Binding ElementName=SessionList, Path=SelectedItem}">
+            <Grid.KeyBindings>
+                <KeyBinding Gesture="Back" Command="{Binding GotoPreviousDirectoryCommand}"/>
+            </Grid.KeyBindings>
+            <Grid.Styles>
+                <Style Selector="material|ColorZone /template/ Border#InnerBorder">
+                    <Setter Property="ClipToBounds" Value="False" />
+                </Style>
+            </Grid.Styles>
+            
+            <!-- Main view of file explorer -->
+            <Panel Grid.Row="2" ContextMenu="{StaticResource CatalogContextMenus}">
+                <ScrollViewer>
+                    <Panel Name="PART_MainPanelOfExplorer" Width="{Binding $parent[ScrollViewer].Bounds.Width}">
+                        <ItemsRepeater Items="{Binding ContentCollections}" Margin="16"
+                                       ContextMenu="{DynamicResource FileContextMenus}"
+                                       ItemTemplate="{StaticResource RecyclingItemTemplateBlockView}"
+                                       KeyboardNavigation.TabNavigation="Continue">
+                            <ItemsRepeater.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding OpenCommand}"/>
+                                <KeyBinding Gesture="Space" Command="{Binding SelectItemCommand}"/>
+                            </ItemsRepeater.KeyBindings>
+                            <ItemsRepeater.Layout>
+                                <UniformGridLayout Orientation="Horizontal" MinItemWidth="240"
+                                                   MinColumnSpacing="10" MinRowSpacing="10"
+                                                   ItemsStretch="Fill" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.Styles>
+                                <Style Selector="Border#PART_ItemButton[IsVisible=True]:not(.notransitions) > Border#PART_ItemRoot">
+                                    <Setter Property="Transitions">
+                                        <Setter.Value>
+                                            <Transitions>
+                                                <TransformOperationsTransition Property="RenderTransform" Duration="0.25" Easing="CircularEaseOut"/>
+                                                <DoubleTransition Property="Opacity" Duration="0.25" Easing="CircularEaseOut"/>
+                                            </Transitions>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ItemsRepeater.Styles>
+                        </ItemsRepeater>
+                    </Panel>
+                </ScrollViewer>
+
+                <material:Card IsVisible="{Binding !!ContentSupportingText}">
+                    <TextBlock Text="{Binding ContentSupportingText}" />
+                </material:Card>
+                
+                <material:Card Margin="16" Padding="4" CornerRadius="64" IsVisible="{Binding IsRunningTask}"
+                               VerticalAlignment="Top" HorizontalAlignment="Center">
+                    <ProgressBar Classes="Circle" IsIndeterminate="True" Width="24" Height="24"/>
+                </material:Card>
+            </Panel>
+            
+            <!-- AppBar -->
+            <material:ColorZone Mode="Standard" Height="128"
+                                HorizontalAlignment="Stretch"
+                                ClipToBounds="False" ZIndex="1">
+                <Grid ClipToBounds="False" RowDefinitions="Auto,*,Auto,8,0" ColumnDefinitions="Auto, 16, *"
+                      Margin="16,16, 16,0">
+                    <!-- App top section (TitleBar, NavToggle and etc.) -->
+                    <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="32" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ToggleButton Name="NavDrawerToggler" Classes="Flat TransparentBack"
+                                      Width="32" Height="32" VerticalAlignment="Top"
+                                      Content="{avalonia:MaterialIconExt Kind=Menu, Size=24}"
+                                      Grid.Column="0" />
+                        <Grid Grid.Column="2" RowDefinitions="Auto,Auto">
+                            <TextBlock Classes="Subtitle1" Text="{Binding CurrentDirectory}"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Bottom" />
+                            <TextBlock Grid.Row="1" Classes="Caption"
+                                       Text="{Binding CurrentDirectorySupporting}" />
+                        </Grid>
+                        
+                        <ItemsRepeater Grid.Column="4" Items="{Binding ContextHeaderButton}"
+                                       KeyboardNavigation.TabNavigation="Continue">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="16" Orientation="Horizontal"/>
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate DataType="vm:ContextHeaderButtonViewModel">
+                                    <Button Classes="Flat" Width="32" Height="32" Padding="4" ToolTip.Tip="{CompiledBinding ToolTip}">
+                                        <avalonia:MaterialIcon Kind="{CompiledBinding Icon}"
+                                                               Width="24" Height="24"/>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </Grid>
+                    
+                    <!-- Breadcrumbs -->
+                    <ScrollViewer Name="BreadcrumbsViewer" Grid.Column="2" Grid.Row="2"
+                                  VerticalScrollBarVisibility="Disabled" KeyboardNavigation.TabNavigation="Continue">
+                        <ItemsControl Items="{Binding PathBreadcrumbs}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="Outline" Padding="8,0" Command="{Binding JumpIntoPathCommand}"
+                                            CommandParameter="{Binding ElementName=SessionList, Path=SelectedItem}"
+                                            Margin="2" Height="24" MaxWidth="800"
+                                            assists:ShadowAssist.ShadowDepth="Depth0"
+                                            assists:ButtonAssist.CornerRadius="12">
+                                        <TextBlock Text="{Binding }" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </material:ColorZone>
+        </Grid>
+    </material:NavigationDrawer>
+</Window>

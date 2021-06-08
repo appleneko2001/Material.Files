@@ -1,0 +1,32 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:material="clr-namespace:Material.Styles;assembly=Material.Styles"
+        xmlns:ext="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:commands="clr-namespace:Material.Files.Commands;assembly=Material.Files"
+        xmlns:viewModel="clr-namespace:Material.Files.ViewModel">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <!--ContextMenu x:Key="FileContextMenus" x:DataType="viewModel:ContextMenuViewModel">
+        <MenuItem Header="Open" Command="{x:Static commands:ContextMenuCommands.OpenCommand}" CommandParameter="{Binding }"/>
+        <MenuItem Header="Open as..." Command="{x:Static commands:ContextMenuCommands.OpenWithCommand}" CommandParameter="{Binding }"/>
+        <MenuItem Header="Open in new tab" Command="{x:Static commands:ContextMenuCommands.OpenInNewTabCommand}" CommandParameter="{Binding }"/>
+        <Separator/>
+        <MenuItem Header="Cut" Icon="{ext:MaterialIconExt Kind=ContentCut}"/>
+        <MenuItem Header="Copy" Icon="{ext:MaterialIconExt Kind=ContentCopy}"/>
+        <MenuItem Header="Paste" Icon="{ext:MaterialIconExt Kind=ContentPaste}"/>
+        <Separator/>
+        <MenuItem Header="Delete" Icon="{ext:MaterialIconExt Kind=TrashCan}" Command="{x:Static commands:ContextMenuCommands.DeleteCommand}" CommandParameter="{Binding }"/>
+        <MenuItem Header="Rename"/>
+        <Separator/>
+        <MenuItem Header="Properties"/>
+      </ContextMenu-->
+      
+      <ContextMenu x:Key="CatalogContextMenus" x:DataType="viewModel:ContextMenuViewModel">
+        <MenuItem Header="Paste" Icon="{ext:MaterialIconExt Kind=ContentPaste}"/>
+        <Separator/>
+        <MenuItem Header="Properties"/>
+      </ContextMenu>
+    </ResourceDictionary>
+  </Styles.Resources>
+</Styles>

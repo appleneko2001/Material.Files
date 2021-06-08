@@ -1,0 +1,130 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             xmlns:convs="clr-namespace:Material.Files.Converters;assembly=Material.Files"
+             xmlns:ripple="clr-namespace:Material.Ripple;assembly=Material.Ripple"
+             xmlns:styles="clr-namespace:Material.Styles;assembly=Material.Styles"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             x:Class="Material.Files.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <convs:HumanReadableSizeConverter x:Key="HumanReadableSize" />
+            <ResourceDictionary.MergedDictionaries>
+                <themes:BundledTheme BaseTheme="Light" PrimaryColor="Indigo" SecondaryColor="Pink" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+    <Application.Styles>
+        <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" />
+        <StyleInclude Source="avares://Material.DataGrid/DataGrid.xaml" />
+
+        <StyleInclude Source="avares://Material.Files/AxamlIncludes/ContextMenus.axaml" />
+
+        <Style Selector=":is(Control)">
+            <Setter Property="FocusAdorner">
+                <FocusAdornerTemplate>
+                    <Rectangle Stroke="{DynamicResource PrimaryHueMidBrush}"
+                               StrokeThickness="2" IsHitTestVisible="False"
+                               StrokeDashArray="1,1"
+                               Margin="0" />
+                </FocusAdornerTemplate>
+            </Setter>
+        </Style>
+        
+        <Style Selector="MenuItem">
+            <Setter Property="Height" Value="NaN" />
+            <Setter Property="MinWidth" Value="160" />
+            <Setter Property="Padding" Value="16, 8" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="PART_MenuItemRootBorder" Height="{TemplateBinding Height}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Panel>
+                            <Border Name="PART_MenuItemHighlighter"
+                                    Background="{DynamicResource MaterialDesignBody}" />
+                            <ripple:RippleEffect RippleFill="{DynamicResource MaterialDesignFlatButtonRipple}">
+                                <Grid Margin="{TemplateBinding Padding}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" SharedSizeGroup="MenuItemIGT" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                        <ContentPresenter Name="PART_Icon" Margin="0,0,8,0"
+                                                          Content="{TemplateBinding Icon}"
+                                                          IsVisible="{Binding !!$self.Content}"
+                                                          VerticalAlignment="Center" />
+
+                                        <ContentPresenter Name="PART_HeaderPresenter"
+                                                          Content="{TemplateBinding Header}"
+                                                          Margin="0" Padding="0" VerticalAlignment="Center"
+                                                          HorizontalAlignment="Left">
+                                            <ContentPresenter.Styles>
+                                                <Style Selector="TextBlock">
+                                                    <Setter Property="TextAlignment" Value="Left" />
+                                                </Style>
+                                            </ContentPresenter.Styles>
+                                            <ContentPresenter.DataTemplates>
+                                                <DataTemplate DataType="system:String">
+                                                    <AccessText Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ContentPresenter.DataTemplates>
+                                        </ContentPresenter>
+                                    </StackPanel>
+
+                                    <TextBlock Name="PART_InputGestureText" Grid.Column="1" VerticalAlignment="Center"
+                                               Text="{TemplateBinding InputGesture, Converter={StaticResource KeyGestureConverter}}" />
+
+                                    <!--Path Name="rightArrow"
+                                  Data="M0,0L4,3.5 0,7z"
+                                  Margin="10,0,0,0"
+                                  Fill="{TemplateBinding Foreground}"
+                                  VerticalAlignment="Center"
+                                  Grid.Column="3" /-->
+                                    <Popup Grid.Column="0" Name="PART_Popup" PlacementMode="Right"
+                                           IsLightDismissEnabled="True"
+                                           IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}">
+                                        <styles:Card Padding="0">
+                                            <Border Name="MainBorder"
+                                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                                <ScrollViewer>
+                                                    <ItemsPresenter Name="PART_ItemsPresenter"
+                                                                    Items="{TemplateBinding Items}"
+                                                                    ItemsPanel="{TemplateBinding ItemsPanel}"
+                                                                    ItemTemplate="{TemplateBinding ItemTemplate}"
+                                                                    Margin="0 8" />
+                                                </ScrollViewer>
+                                            </Border>
+                                        </styles:Card>
+                                    </Popup>
+                                </Grid>
+                            </ripple:RippleEffect>
+                        </Panel>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+
+        <Style
+            Selector="MenuItem > MenuItem:not(:disabled):not(:selected) /template/ Border#PART_MenuItemHighlighter,
+    ContextMenu > MenuItem:not(:disabled):not(:selected) /template/ Border#PART_MenuItemHighlighter">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <Style
+            Selector="MenuItem > MenuItem:disabled:not(:selected) /template/ Border#PART_MenuItemHighlighter,
+    ContextMenu > MenuItem:disabled:not(:selected) /template/ Border#PART_MenuItemHighlighter">
+            <Setter Property="Opacity" Value="0" />
+        </Style>
+
+        <Style
+            Selector="MenuItem > MenuItem:not(.Menu):not(:disabled):selected /template/ Border#PART_MenuItemHighlighter,
+    ContextMenu > MenuItem:not(.Menu):not(:disabled):selected /template/ Border#PART_MenuItemHighlighter">
+            <Setter Property="Opacity" Value="0.13" />
+        </Style>
+    </Application.Styles>
+</Application>
