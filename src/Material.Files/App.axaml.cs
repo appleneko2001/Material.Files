@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Collections;
@@ -18,6 +19,12 @@ namespace Material.Files
 {
     public class App : Application
     {
+        public static string TargetCacheFolder { get; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Material.Files", "Caches");
+        
+        public static string ThumbnailsCacheFolder { get; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Material.Files", "Caches", "Thumbnails");
+
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
