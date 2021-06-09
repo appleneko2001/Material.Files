@@ -1,7 +1,9 @@
-﻿using Material.Files.Interfaces;
+﻿using System;
+using Material.Files.Interfaces;
 using Material.Styles;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Material.Files.Resolvers;
 using Material.Icons;
 
@@ -49,7 +51,7 @@ namespace Material.Files.Model
             }
         }
         
-        public FileModel(FileInfo info) : base(info)
+        public FileModel(FileInfo info, CancellationToken ctx = default) : base(info)
         {
             m_FileSize = (ulong) info.Length;
             FileSizeString = m_FileSize.ToHumanReadableSizeString();
@@ -67,6 +69,7 @@ namespace Material.Files.Model
             if (TryCreateImageThumbnailModel(this, out var thumbnail))
             {
                 _imageThumbnail = thumbnail;
+                thumbnail.SetCancellationToken(ctx);
                 //thumbnail.GetThumbnailAsync();
             }
         }
@@ -78,14 +81,17 @@ namespace Material.Files.Model
             {
                 if (file._mimeType.Type == "image")
                 {
-                    o = new ImageThumbnailModel(file.FullPath, delegate
+                    //var hashResult = App.HashCompute.ComputeHash(Encoding.UTF8.GetBytes(file.FullPath));
+                    //var cacheId = hashResult.AsHexString(true);
+                    var cacheId = file.FullPath;
+                    o = new ImageThumbnailModel(cacheId, delegate
                     {
                         return File.Open(FullPath, FileMode.Open);
                     });
                     return true;
                 }
             }
-            catch
+            catch(Exception e)
             {
                 
             }
