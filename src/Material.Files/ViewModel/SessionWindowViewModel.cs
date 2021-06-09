@@ -259,7 +259,7 @@ namespace Material.Files.ViewModel
                 foreach (var item in dirs)
                     results.Add(new DirectoryModel(item));
                 foreach (var item in files)
-                    results?.Add(new FileModel(item));
+                    results?.Add(new FileModel(item, ctx.Token));
 
                 filesCount = files.Count();
                 dirsCount = dirs.Count();
